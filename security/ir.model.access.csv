@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_safe_quality_food_document_all,safe_quality_food.document all,model_safe_quality_food_document,,1,0,0,0
+access_safe_quality_food_document_user,safe_quality_food.document user,model_safe_quality_food_document,group_safe_quality_food_user,1,1,1,0
+access_safe_quality_food_document_manager,safe_quality_food.document manager,model_safe_quality_food_document,group_safe_quality_food_manager,1,1,1,0

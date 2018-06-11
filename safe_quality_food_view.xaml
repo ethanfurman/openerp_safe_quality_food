@@ -1,0 +1,167 @@
+!!!xml1.0
+
+-act_window = 'ir.actions.act_window'
+-act_window_view = 'ir.actions.act_window.view'
+-view = 'ir.ui.view'
+-write_if_draft = "{'writeonly': [('state','in','draft')]}"
+-read_only = "{'readonly': True}"
+-writeonly = "groups('safe_quality_food.group_manager')"
+
+~openerp
+    ~data noupdate='0'
+
+        ~menuitem @SQF #safe_quality_food_main
+        ~menuitem @Safe_Quality_Food #safe_quality_food_sub sequence='10' parent='safe_quality_food_main'
+
+        ~record model=view #safe_quality_food_document_list
+            @name: safe_quality_food.document.list
+            @model: safe_quality_food.document
+            @arch type='xml'
+                ~tree $Safe_Quality_Food_Document
+                    @reference
+                    @name
+                    @state
+
+        ~record model=view #safe_quality_food_document_developing_form
+            @name: safe_quality_food.document.developing_form
+            @model: safe_quality_food.document
+            @arch type='xml'
+                ~form $Safe_Quality_Food_Document version='7.0'
+                    ~header
+                        ~span .oe_view_only attrs="{'invisible': ['|','|','|','|','|','|',('state','!=', 'draft'),('reference','=',False),('prepared_by_id','=',False),('version','=',False),('sqf_edition','=',False),('effective_date','=',False),('signing_id','=',False)]}"
+                            ~button @button_submit_for_signing $Submit .oe_highlight type='object'
+                        @state widget='statusbar' statusbar_visible='draft,submitted'
+                    ~group
+                        ~group
+                            @name
+                            @reference
+                            @version
+                            @sqf_edition
+                        ~group
+                            @effective_date
+                            @supercedes
+                            @superceded_by
+                        ~group
+                            @prepared_by_id
+                        ~group
+                            @approved_by
+                        ~group
+                            @signing_id $To_be_signed_by
+                    ~hr
+                    @body cols='4' nolabel='1' widget='html'
+                    ~hr
+                    ~div .oe_view_only attrs="{'invisible': [('state','!=','submitted')]}"
+                        ~button @button_sign_document $Sign_Document .oe_highlight type='object'
+                        or
+                        ~button @button_edit_document $Needs_more_editing .oe_link type='object'
+                        ~hr
+                    ~div .oe_chatter
+                        @message_follower_ids widget='mail_followers'
+                        @message_ids widget='mail_thread' nolabel='1'
+
+        ~record model=view #safe_quality_food_developing_search_filter
+            @name: safe_quality_food.document.developing_search
+            @model: safe_quality_food.document
+            @arch type='xml'
+                ~search $Search_Safe_Quality_Food
+                    @name $Document
+                    @reference $Reference_Section
+                    @body $Document_Text
+                    ~separator
+                    ~filter $Draft @type_draft domain="[('state','=','draft')]"
+                    ~filter $Submitted @type_submitted domain="[('state','=','submitted')]"
+
+        ~record model=act_window #safe_quality_food_document_developing_action
+            @name: Safe Quality Food
+            @res_model: safe_quality_food.document
+            @view_type: form
+            @view_mode: tree,form
+            @view_id ref='safe_quality_food_document_list'
+            @context: {}
+            @domain: [('state','in',['draft','submitted'])]
+            @search_view_id ref='safe_quality_food_developing_search_filter'
+
+        ~record model=act_window_view #safe_quality_food_document_developing_tree_view_action
+            @sequence eval='20'
+            @view_mode: tree
+            @view_id ref='safe_quality_food_document_list'
+            @act_window_id ref='safe_quality_food_document_developing_action'
+
+        ~record model=act_window_view #safe_quality_food_document_developing_form_view_action
+            @sequence eval='21'
+            @view_mode: form
+            @view_id ref='safe_quality_food_document_developing_form'
+            @act_window_id ref='safe_quality_food_document_developing_action'
+
+        ~record model=view #safe_quality_food_document_approved_form
+            @name: safe_quality_food.document.approved_form
+            @model: safe_quality_food.document
+            @arch type='xml'
+                ~form $Safe_Quality_Food_Document create='0' edit='0' version='7.0'
+                    ~header
+                        @state widget='statusbar' statusbar_visible='active'
+                    ~group
+                        ~group
+                            @name                               attrs=read_only
+                            @reference                          attrs=read_only
+                            @version                            attrs=read_only
+                            @sqf_edition                        attrs=read_only
+                        ~group
+                            @effective_date                     attrs=read_only
+                            @supercedes                         attrs=read_only
+                            @superceded_by                      attrs="{'invisible': [('superceded_by','=',False)]}" writeonly="groups('safe_quality_food.group_manager')" 
+                        ~group
+                            @prepared_by_id                     attrs=read_only
+                        ~group
+                            @approved_by                        attrs=read_only
+                        ~group
+                            @signing_id $Signed_by              attrs=read_only
+                            @signed_date $Signed_date           attrs=read_only
+                    ~hr
+                    @body cols='4' nolabel='1' widget='html'    attrs=read_only
+                    ~hr
+                    ~div .oe_chatter
+                        @message_follower_ids widget='mail_followers'
+                        @message_ids widget='mail_thread' nolabel='1'
+
+        ~record model=view #safe_quality_food_approved_search_filter
+            @name: safe_quality_food.document.approved_search
+            @model: safe_quality_food.document
+            @arch type='xml'
+                ~search $Search_Safe_Quality_Food
+                    @name $Document
+                    @reference $Reference_Section
+                    @body $Document_Text
+                    ~separator
+                    ~filter $Future @type_signed domain="[('state','=','signed')]"
+                    ~filter $Active @type_active domain="[('state','=','active')]"
+                    ~filter $Superceded @type_retired domain="[('state','=','retired')]"
+                    ~filter $Cancelled @type_cancelled domain="[('state','=','cancelled')]"
+
+        ~record model=act_window #safe_quality_food_document_approved_action
+            @name: Safe Quality Food
+            @res_model: safe_quality_food.document
+            @sequence eval='0'
+            @view_type: form
+            @view_mode: tree,form
+            @view_id ref='safe_quality_food_document_list'
+            @context: {'search_default_type_active': 1}
+            @domain: [('state','in',['signed','active','retired','cancelled'])]
+            @search_view_id ref='safe_quality_food_approved_search_filter'
+
+        ~record model=act_window_view #safe_quality_food_document_approved_tree_view_action
+            @sequence eval='20'
+            @view_mode: tree
+            @view_id ref='safe_quality_food_document_list'
+            @act_window_id ref='safe_quality_food_document_approved_action'
+
+        ~record model=act_window_view #safe_quality_food_document_approved_form_view_action
+            @sequence eval='21'
+            @view_mode: form
+            @view_id ref='safe_quality_food_document_approved_form'
+            @act_window_id ref='safe_quality_food_document_approved_action'
+
+
+        ~menuitem name='In Progress' #safe_quality_food_developing sequence='15' parent='safe_quality_food_sub' action='safe_quality_food_document_developing_action' groups='safe_quality_food.group_safe_quality_food_user,safe_quality_food.group_safe_quality_food_manager'
+        ~menuitem name='Approved' #safe_quality_food_approved sequence='20' parent='safe_quality_food_sub' action='safe_quality_food_document_approved_action'
+

@@ -1,0 +1,49 @@
+!!!xml1.0
+
+~openerp
+    ~data noupdate='0'
+
+        // mail message subtypes
+
+        ~record model='mail.message.subtype' #mt_safe_quality_food_draft
+            @name: Document Created
+            @res_model: safe_quality_food.document
+            @default eval='True'
+            @sequence eval='1'
+            @description: Document needs editing.
+
+        ~record model='mail.message.subtype' #mt_safe_quality_food_submitted
+            @name: Document Submitted for Signature
+            @res_model: safe_quality_food.document
+            @default eval='True'
+            @sequence eval='5'
+            @description: Document submitted for signature.
+
+        ~record model='mail.message.subtype' #mt_safe_quality_food_signed
+            @name: Documented Signed
+            @res_model: safe_quality_food.document
+            @default eval='True'
+            @sequence eval='11'
+            @description: Document signed.
+
+        ~record model='mail.message.subtype' #mt_safe_quality_food_active
+            @name: Documented Active
+            @res_model: safe_quality_food.document
+            @default eval='True'
+            @sequence eval='21'
+            @description: Document is active.
+
+        ~record model='mail.message.subtype' #mt_safe_quality_food_retired
+            @name: Documented Superceded
+            @res_model: safe_quality_food.document
+            @default eval='True'
+            @sequence eval='31'
+            @description: Document has been superceded.
+
+        ~record model='mail.message.subtype' #mt_safe_quality_food_cancelled
+            @name: Documented Cancelled
+            @res_model: safe_quality_food.document
+            @default eval='True'
+            @sequence eval='51'
+            @description: Document has been cancelled.
+
