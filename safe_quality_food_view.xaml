@@ -20,6 +20,7 @@
                 ~tree $Safe_Quality_Food_Document
                     @reference
                     @name
+                    @version
                     @state
 
         ~record model=view #safe_quality_food_document_developing_form
@@ -161,7 +162,23 @@
             @view_id ref='safe_quality_food_document_approved_form'
             @act_window_id ref='safe_quality_food_document_approved_action'
 
-
         ~menuitem name='In Progress' #safe_quality_food_developing sequence='15' parent='safe_quality_food_sub' action='safe_quality_food_document_developing_action' groups='safe_quality_food.group_safe_quality_food_user,safe_quality_food.group_safe_quality_food_manager'
         ~menuitem name='Approved' #safe_quality_food_approved sequence='20' parent='safe_quality_food_sub' action='safe_quality_food_document_approved_action'
+
+        ~record model='ir.actions.server' #safe_quality_food_document_next_version_action
+           @name: Next version
+           @type: ir.actions.server
+           @model_id ref='model_safe_quality_food_document'
+           @state: code
+           @code: self.menu_next_version(cr, uid, context.get('active_ids'), context=context)
+
+        ~record model='ir.values' #safe_quality_food_document_next_version_value
+           @name: Next version
+           @action_id ref='safe_quality_food_document_next_version_action'
+           @value eval="'ir.actions.server,' + str(ref('safe_quality_food_document_next_version_action'))"
+           @key: action
+           @model_id ref='model_safe_quality_food_document'
+           @model: safe_quality_food.document
+           @key2: client_action_multi
+
 

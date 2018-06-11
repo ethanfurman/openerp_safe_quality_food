@@ -129,3 +129,27 @@ class safe_quality_food_document(osv.Model):
                     },
                 context=context,
                 )
+
+    def menu_next_version(self, cr, uid, ids, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        for doc in self.browse(cr, uid, ids, context=context):
+            vals = {}
+            vals['name'] = doc.name
+            vals['state'] = PublicationStatus.draft
+            vals['reference'] = doc.reference
+            vals['approved_by'] = doc.approved_by
+            vals['signing_id'] = doc.signing_id.id
+            vals['supercedes'] = doc.effective_date
+            vals['version'] = doc.version + 1
+            vals['body'] = doc.body
+            # check to see if it already exists
+            found = self.search(
+                    cr, uid,
+                    [('reference','=',doc.reference),('name','=',doc.name),('version','=',doc.version)],
+                    context=context)
+            if found:
+                raise ERPError('Duplicate Document', '%s %s version %s already exists' %
+                        (doc['reference'], doc['name'], doc['version']))
+            self.create(cr, uid, vals, context=context)
+        return True
