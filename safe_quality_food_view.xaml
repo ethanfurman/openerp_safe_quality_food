@@ -56,6 +56,10 @@
                         or
                         ~button @button_edit_document $Needs_more_editing .oe_link type='object'
                         ~hr
+                    ~div attrs="{'invisible': [('fnxfs_files','=',False)]}"
+                        ~newline
+                        ~label for='fnxfs_files' $Related_Documents
+                        @fnxfs_files colspan='4' nolabel='1'
                     ~div .oe_chatter
                         @message_follower_ids widget='mail_followers'
                         @message_ids widget='mail_thread' nolabel='1'
@@ -119,7 +123,7 @@
                             @signing_id $Signed_by              attrs=read_only
                             @signed_date $Signed_date           attrs=read_only
                     ~hr
-                    @body cols='4' nolabel='1' widget='html'    attrs=read_only
+                    @body cols='4' nolabel='1'                  attrs=read_only
                     ~hr
                     ~div .oe_chatter
                         @message_follower_ids widget='mail_followers'

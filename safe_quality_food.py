@@ -30,9 +30,11 @@ class PublicationStatus(fields.SelectionEnum):
 
 class safe_quality_food_document(osv.Model):
     _name = 'safe_quality_food.document'
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'ir.needaction_mixin', 'fnx_fs.fs']
     _order = 'name, version desc'
     _description = 'Safe Quality Food Document'
+
+    _fnxfs_path = 'safe_quality_food/documents'
 
     _track = {
         'state' : {
@@ -44,6 +46,7 @@ class safe_quality_food_document(osv.Model):
             'safe_quality_food.mt_safe_quality_food_cancelled': lambda s, c, u, r, ctx: r['state'] == 'cancelled',
             }
         }
+
 
     def _auto_init(self, cr, context=None):
         super(safe_quality_food_document, self)._auto_init(cr, context)
@@ -129,6 +132,12 @@ class safe_quality_food_document(osv.Model):
                     },
                 context=context,
                 )
+
+    def fnxfs_folder_name(self, cr, uid, ids, context=None):
+        res = {}
+        for datom in self.read(cr, uid, ids, fields=['reference','name'], context=context):
+            res[datom['id']] = '%s-%s' % (datom['reference'], datom['name'])
+        return res
 
     def menu_next_version(self, cr, uid, ids, context=None):
         if isinstance(ids, (int, long)):
