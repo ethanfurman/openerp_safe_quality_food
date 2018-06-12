@@ -162,3 +162,10 @@ class safe_quality_food_document(osv.Model):
                         (doc['reference'], doc['name'], doc['version']))
             self.create(cr, uid, vals, context=context)
         return True
+
+    def unlink(self, cr, uid, ids, context=None):
+        # do not allow deletion of approved documents
+        approved = self.search(cr, uid, [('id','in',ids),('state','!=',PublicationStatus.draft)], context=context)
+        if approved:
+            raise ERPError('Error', 'Unable to remove approved documents')
+        return super(safe_quality_food_document, self).unlink(cr, uid, ids, context=context)

@@ -102,7 +102,7 @@
             @name: safe_quality_food.document.approved_form
             @model: safe_quality_food.document
             @arch type='xml'
-                ~form $Safe_Quality_Food_Document create='0' edit='0' version='7.0'
+                ~form $Safe_Quality_Food_Document create='0' edit='0' delete='0' version='7.0'
                     ~header
                         @state widget='statusbar' statusbar_visible='active'
                     ~group
