@@ -123,7 +123,7 @@
                             @signing_id $Signed_by              attrs=read_only
                             @signed_date $Signed_date           attrs=read_only
                     ~hr
-                    @body cols='4' nolabel='1'                  attrs=read_only
+                    @body cols='4' nolabel='1' widget='html'    attrs=read_only
                     ~hr
                     ~div .oe_chatter
                         @message_follower_ids widget='mail_followers'
