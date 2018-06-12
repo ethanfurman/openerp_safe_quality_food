@@ -125,6 +125,10 @@
                     ~hr
                     @body cols='4' nolabel='1' widget='html'    attrs=read_only
                     ~hr
+                    ~div attrs="{'invisible': [('fnxfs_files','=',False)]}"
+                        ~newline
+                        ~label for='fnxfs_files' $Related_Documents
+                        @fnxfs_files colspan='4' nolabel='1'
                     ~div .oe_chatter
                         @message_follower_ids widget='mail_followers'
                         @message_ids widget='mail_thread' nolabel='1'
