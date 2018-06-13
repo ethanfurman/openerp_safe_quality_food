@@ -20,28 +20,28 @@
             @description: Document submitted for signature.
 
         ~record model='mail.message.subtype' #mt_safe_quality_food_signed
-            @name: Documented Signed
+            @name: Document Signed
             @res_model: safe_quality_food.document
             @default eval='True'
             @sequence eval='11'
             @description: Document signed.
 
         ~record model='mail.message.subtype' #mt_safe_quality_food_active
-            @name: Documented Active
+            @name: Document Active
             @res_model: safe_quality_food.document
             @default eval='True'
             @sequence eval='21'
             @description: Document is active.
 
         ~record model='mail.message.subtype' #mt_safe_quality_food_retired
-            @name: Documented Superceded
+            @name: Document Superceded
             @res_model: safe_quality_food.document
             @default eval='True'
             @sequence eval='31'
             @description: Document has been superceded.
 
         ~record model='mail.message.subtype' #mt_safe_quality_food_cancelled
-            @name: Documented Cancelled
+            @name: Document Cancelled
             @res_model: safe_quality_food.document
             @default eval='True'
             @sequence eval='51'
