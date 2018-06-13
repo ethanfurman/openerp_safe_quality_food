@@ -16,4 +16,3 @@
             @category_id ref='module_safe_quality_food'
             @comment: Manager can sign and cancell documents.
             @implied_ids eval="[(6, 0, [ref('group_safe_quality_food_user')])]"
-            @users eval="[(4, ref('base.user_root'))]"
