@@ -29,7 +29,7 @@
             @arch type='xml'
                 ~form $Safe_Quality_Food_Document version='7.0'
                     ~header
-                        ~span .oe_view_only attrs="{'invisible': ['|','|','|','|','|','|',('state','!=', 'draft'),('reference','=',False),('prepared_by_id','=',False),('version','=',False),('sqf_edition','=',False),('effective_date','=',False),('signing_id','=',False)]}"
+                        ~span .oe_view_only attrs="{'invisible': ['|','|','|','|','|','|',('state','!=', 'draft'),('reference','=',False),('prepared_by','=',False),('version','=',False),('sqf_edition','=',False),('effective_date','=',False),('signing_id','=',False)]}"
                             ~button @button_submit_for_signing $Submit .oe_highlight type='object'
                         @state widget='statusbar' statusbar_visible='draft,submitted'
                     ~group
@@ -43,7 +43,7 @@
                             @supercedes
                             @superceded_by
                         ~group
-                            @prepared_by_id
+                            @prepared_by
                         ~group
                             @approved_by
                         ~group
@@ -116,7 +116,7 @@
                             @supercedes                         attrs=read_only
                             @superceded_by                      attrs="{'invisible': [('superceded_by','=',False)]}" writeonly="groups('safe_quality_food.group_manager')" 
                         ~group
-                            @prepared_by_id                     attrs=read_only
+                            @prepared_by                        attrs=read_only
                         ~group
                             @approved_by                        attrs=read_only
                         ~group
