@@ -1,8 +1,11 @@
 !!!xml1.0
 
+-act_server = 'ir.actions.server'
 -act_window = 'ir.actions.act_window'
 -act_window_view = 'ir.actions.act_window.view'
+-values = 'ir.values'
 -view = 'ir.ui.view'
+
 -write_if_draft = "{'writeonly': [('state','in','draft')]}"
 -read_only = "{'readonly': True}"
 -writeonly = "groups('safe_quality_food.group_manager')"
@@ -41,7 +44,7 @@
                         ~group
                             @effective_date
                             @supercedes
-                            @superceded_by
+                            @superceded_by attrs="{'invisible': [('state','=','cancelled')]}"
                         ~group
                             @prepared_by
                         ~group
@@ -114,7 +117,7 @@
                         ~group
                             @effective_date                     attrs=read_only
                             @supercedes                         attrs=read_only
-                            @superceded_by                      attrs="{'invisible': [('superceded_by','=',False)]}" writeonly="groups('safe_quality_food.group_manager')" 
+                            @superceded_by                      attrs="{'invisible': [('state','!=','retired')]}" writeonly="groups('safe_quality_food.group_manager')" 
                         ~group
                             @prepared_by                        attrs=read_only
                         ~group
@@ -173,14 +176,14 @@
         ~menuitem name='In Progress' #safe_quality_food_developing sequence='15' parent='safe_quality_food_sub' action='safe_quality_food_document_developing_action' groups='safe_quality_food.group_safe_quality_food_user,safe_quality_food.group_safe_quality_food_manager'
         ~menuitem name='Approved' #safe_quality_food_approved sequence='20' parent='safe_quality_food_sub' action='safe_quality_food_document_approved_action'
 
-        ~record model='ir.actions.server' #safe_quality_food_document_next_version_action
+        ~record model=act_server #safe_quality_food_document_next_version_action
            @name: Next version
            @type: ir.actions.server
            @model_id ref='model_safe_quality_food_document'
            @state: code
            @code: self.menu_next_version(cr, uid, context.get('active_ids'), context=context)
 
-        ~record model='ir.values' #safe_quality_food_document_next_version_value
+        ~record model=values #safe_quality_food_document_next_version_value
            @name: Next version
            @action_id ref='safe_quality_food_document_next_version_action'
            @value eval="'ir.actions.server,' + str(ref('safe_quality_food_document_next_version_action'))"
@@ -189,4 +192,34 @@
            @model: safe_quality_food.document
            @key2: client_action_multi
 
+        ~record model=act_server #safe_quality_food_document_withdraw_action
+           @name: Withdraw
+           @type: ir.actions.server
+           @model_id ref='model_safe_quality_food_document'
+           @state: code
+           @code: self.menu_withdraw(cr, uid, context.get('active_ids'), context=context)
 
+        ~record model=values #safe_quality_food_document_withdraw_value
+           @name: Withdraw
+           @action_id ref='safe_quality_food_document_withdraw_action'
+           @value eval="'ir.actions.server,' + str(ref('safe_quality_food_document_withdraw_action'))"
+           @key: action
+           @model_id ref='model_safe_quality_food_document'
+           @model: safe_quality_food.document
+           @key2: client_action_multi
+
+        ~record model=act_server #safe_quality_food_document_cancel_action
+           @name: Cancel
+           @type: ir.actions.server
+           @model_id ref='model_safe_quality_food_document'
+           @state: code
+           @code: self.menu_cancel(cr, uid, context.get('active_ids'), context=context)
+
+        ~record model=values #safe_quality_food_document_cancel_value
+           @name: Cancel
+           @action_id ref='safe_quality_food_document_cancel_action'
+           @value eval="'ir.actions.server,' + str(ref('safe_quality_food_document_cancel_action'))"
+           @key: action
+           @model_id ref='model_safe_quality_food_document'
+           @model: safe_quality_food.document
+           @key2: client_action_multi

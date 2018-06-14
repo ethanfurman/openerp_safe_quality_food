@@ -15,7 +15,9 @@ class PublicationStatus(fields.SelectionEnum):
     active = 'Active'
     retired = 'Superceded'
     cancelled = 'Cancelled'
-
+PS = PublicationStatus
+CANCELLABLE_STATES = PS.signed, PS.active, PS.cancelled
+WITHDRAWABLE_STATES = PS.signed, PS.active
 
 # class safe_quality_food_section(osv.Model):
 #     _name = 'safe_quality_food.section'
@@ -47,7 +49,6 @@ class safe_quality_food_document(osv.Model):
             }
         }
 
-
     def _auto_init(self, cr, context=None):
         super(safe_quality_food_document, self)._auto_init(cr, context)
         # Use unique index to implement unique constraint on the lowercase name (not possible using a constraint)
@@ -62,7 +63,8 @@ class safe_quality_food_document(osv.Model):
 
     _columns = {
         'name': fields.char('Document', size=128, required=True),
-        'state': fields.selection(PublicationStatus, string='Status'),
+        'state': fields.selection(PS, string='Status'),
+        'prev_state': fields.selection(PS, string='Previous State', help="used when uncancelling a document"),
         'reference': fields.char('Reference Number', size=64, required=True),
         'prepared_by': fields.char('Prepared By', size=128, oldname='prepared_by_id'),
         'prepared_date': fields.date('Prepared Date'),
@@ -84,7 +86,7 @@ class safe_quality_food_document(osv.Model):
         }
 
     _defaults = {
-        'state': PublicationStatus.draft,
+        'state': PS.draft,
         'version': 1,
         }
 
@@ -92,7 +94,7 @@ class safe_quality_food_document(osv.Model):
         signing_ids = [d['signing_id'][0] for d in self.read(cr, uid, ids, fields=['signing_id'])]
         self.message_subscribe_users(cr, uid, ids, user_ids=signing_ids, context=context)
         values = {
-                'state': PublicationStatus.submitted,
+                'state': PS.submitted,
                 'prepared_date': fields.date.context_today(self, cr, uid, context=context),
                 }
         return self.write(cr, uid, ids, values, context=context)
@@ -110,17 +112,27 @@ class safe_quality_food_document(osv.Model):
             if rec.signing_id.id != uid:
                 raise ERPError('Wrong Signee', 'Document must be signed by\n%s' % rec.signing_id.name)
             if rec.effective_date <= today:
-                state = PublicationStatus.active
+                state = PS.active
             else:
-                state = PublicationStatus.signed
-        return self.write(
+                state = PS.signed
+        result = self.write(
                 cr, uid, ids,
-                {
-                    'state': state,
-                    'signed_date': today,
-                    },
+                {'state': state, 'signed_date': today},
                 context=context,
                 )
+        if state == PS.active:
+            prev_doc_ids = self.search(
+                    cr, uid,
+                    [('reference','=',rec.reference),('name','=',rec.name),('version','=',rec.version-1)],
+                    context=context,
+                    )
+            if prev_doc_ids:
+                result = result and self.write(
+                        cr, uid, prev_doc_ids,
+                        {'state': PS.retired, 'superceded_by': rec.effective_date},
+                        context=context,
+                        )
+        return result
 
     def button_edit_document(self, cr, uid, ids, context=None):
         "document needs more editing"
@@ -132,24 +144,26 @@ class safe_quality_food_document(osv.Model):
         return self.write(
                 cr, uid, ids,
                 {
-                    'state': PublicationStatus.draft,
+                    'state': PS.draft,
                     },
                 context=context,
                 )
 
     def fnxfs_folder_name(self, cr, uid, ids, context=None):
+        "return name of folder to hold related files"
         res = {}
         for datom in self.read(cr, uid, ids, fields=['reference','name'], context=context):
             res[datom['id']] = '%s-%s' % (datom['reference'], datom['name'])
         return res
 
     def menu_next_version(self, cr, uid, ids, context=None):
+        "create next version of document"
         if isinstance(ids, (int, long)):
             ids = [ids]
         for doc in self.browse(cr, uid, ids, context=context):
             vals = {}
             vals['name'] = doc.name
-            vals['state'] = PublicationStatus.draft
+            vals['state'] = PS.draft
             vals['reference'] = doc.reference
             vals['approved_by'] = doc.approved_by
             vals['signing_id'] = doc.signing_id.id
@@ -167,9 +181,82 @@ class safe_quality_food_document(osv.Model):
             self.create(cr, uid, vals, context=context)
         return True
 
+    def menu_withdraw(self, cr, uid, ids, context=None):
+        "remove approval/signing-request from a final document, reactivate superceded document"
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        reactivate_ids = []
+        for doc in self.browse(cr, uid, ids, context=context):
+            if doc.state not in WITHDRAWABLE_STATES:
+                raise ERPError('Invalid Action', 'Cannot withdraw %s documents' % PS[doc.state].user)
+            if doc.state == PS.active:
+                reactivate_ids.extend([('reference','=',doc.reference),('name','=',doc.name),('version','=',doc.version-1)])
+        self.write(cr, uid, ids, {'state': PS.draft}, context=context)
+        if reactivate_ids:
+            reactivate_ids = self.search(cr, uid, reactivate_ids, context=context)
+            if reactivate_ids:
+                self.write(cr, uid, reactivate_ids, {'state': PS.active}, context=context)
+        return True
+
+    def menu_cancel(self, cr, uid, ids, context=None):
+        "cancel an approved document"
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        signed_ids = []
+        active_ids = []
+        prev_signed_ids = []
+        prev_active_ids = []
+        for doc in self.browse(cr, uid, ids, context=context):
+            print '%s-%s, ver %s: state -> %r  prev_state -> %r' % (doc.reference, doc.name, doc.version, doc.state, doc.prev_state)
+            if doc.state not in CANCELLABLE_STATES:
+                raise ERPError('Invalid Action', 'Cannot cancel %s documents' % PS[doc.state].user)
+            if doc.state == PS.signed:
+                print 'doc is signed'
+                signed_ids.append(doc.id)
+            elif doc.state == PS.active:
+                print 'doc is active'
+                active_ids.append(doc.id)
+            elif doc.state == PS.cancelled and doc.prev_state == PS.signed:
+                print 'doc was signed'
+                prev_signed_ids.append(doc.id)
+            elif doc.state == PS.cancelled and doc.prev_state == PS.active:
+                print 'doc was active'
+                prev_active_ids.append(doc.id)
+            else:
+                _logger.warning('unhandled state for "%s %s %s": %s', doc.reference, doc.name, doc.version, doc.state)
+        #
+        result = True
+        #
+        if signed_ids:
+            result = result and self.write(
+                    cr, uid, signed_ids,
+                    {'state': PS.cancelled, 'prev_state': PS.signed},
+                    context=context,
+                    )
+        if active_ids:
+            result = result and self.write(
+                    cr, uid, active_ids,
+                    {'state': PS.cancelled, 'prev_state': PS.active},
+                    context=context,
+                    )
+        if prev_signed_ids:
+            result = result and self.write(
+                    cr, uid, prev_signed_ids,
+                    {'state': PS.signed, 'prev_state': False},
+                    context=context,
+                    )
+        if prev_active_ids:
+            result = result and self.write(
+                    cr, uid, prev_active_ids,
+                    {'state': PS.active, 'prev_state': False},
+                    context=context,
+                    )
+        #
+        return result
+
     def unlink(self, cr, uid, ids, context=None):
         # do not allow deletion of approved documents
-        approved = self.search(cr, uid, [('id','in',ids),('state','!=',PublicationStatus.draft)], context=context)
+        approved = self.search(cr, uid, [('id','in',ids),('state','!=',PS.draft)], context=context)
         if approved:
             raise ERPError('Error', 'Unable to remove approved documents')
         return super(safe_quality_food_document, self).unlink(cr, uid, ids, context=context)
