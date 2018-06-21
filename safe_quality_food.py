@@ -37,6 +37,7 @@ class safe_quality_food_document(osv.Model):
     _description = 'Safe Quality Food Document'
 
     _fnxfs_path = 'safe_quality_food/documents'
+    _fnxfs_path_fields = ['reference', 'name']
 
     _track = {
         'state' : {
@@ -149,11 +150,11 @@ class safe_quality_food_document(osv.Model):
                 context=context,
                 )
 
-    def fnxfs_folder_name(self, cr, uid, ids, context=None):
+    def fnxfs_folder_name(self, records):
         "return name of folder to hold related files"
         res = {}
-        for datom in self.read(cr, uid, ids, fields=['reference','name'], context=context):
-            res[datom['id']] = '%s-%s' % (datom['reference'], datom['name'])
+        for record in records:
+            res[record['id']] = '%s-%s' % (record['reference'], record['name'])
         return res
 
     def menu_next_version(self, cr, uid, ids, context=None):
@@ -168,12 +169,12 @@ class safe_quality_food_document(osv.Model):
             vals['approved_by'] = doc.approved_by
             vals['signing_id'] = doc.signing_id.id
             vals['supercedes'] = doc.effective_date
-            vals['version'] = doc.version + 1
+            vals['version'] = version = doc.version + 1
             vals['body'] = doc.body
             # check to see if it already exists
             found = self.search(
                     cr, uid,
-                    [('reference','=',doc.reference),('name','=',doc.name),('version','=',doc.version)],
+                    [('reference','=',doc.reference),('name','=',doc.name),('version','=',version)],
                     context=context)
             if found:
                 raise ERPError('Duplicate Document', '%s %s version %s already exists' %
