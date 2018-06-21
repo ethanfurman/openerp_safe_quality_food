@@ -3,7 +3,7 @@
 # imports
 from openerp.osv import fields, osv
 from openerp.exceptions import ERPError
-from fnx import Normalize
+from fnx.oe import Normalize
 import logging
 
 _logger = logging.getLogger(__name__)
