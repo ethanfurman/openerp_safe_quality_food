@@ -3,6 +3,7 @@
 # imports
 from openerp.osv import fields, osv
 from openerp.exceptions import ERPError
+from fnx import Normalize
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ WITHDRAWABLE_STATES = PS.signed, PS.active
 #         'file_ids': fields.one2many('safe_quality_food.file', 'section_id', string='Files'),
 #         }
 
-class safe_quality_food_document(osv.Model):
+class safe_quality_food_document(Normalize, osv.Model):
     _name = 'safe_quality_food.document'
     _inherit = ['mail.thread', 'ir.needaction_mixin', 'fnx_fs.fs']
     _order = 'name, version desc'

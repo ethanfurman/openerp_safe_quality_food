@@ -11,7 +11,8 @@
     'website': '',
     'depends': [
         'base',
-	'mail',
+        'fnx',
+        'mail',
         # 'fnx',
         # 'fis_integration',
         # 'product',
