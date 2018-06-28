@@ -129,7 +129,6 @@
                     @body cols='4' nolabel='1' widget='html'    attrs=read_only
                     ~hr
                     ~div attrs="{'invisible': [('fnxfs_files','=',False)]}"
-                        ~newline
                         ~label for='fnxfs_files' $Related_Documents
                         @fnxfs_files colspan='4' nolabel='1'
                     ~div .oe_chatter
@@ -219,6 +218,28 @@
            @name: Cancel
            @action_id ref='safe_quality_food_document_cancel_action'
            @value eval="'ir.actions.server,' + str(ref('safe_quality_food_document_cancel_action'))"
+           @key: action
+           @model_id ref='model_safe_quality_food_document'
+           @model: safe_quality_food.document
+           @key2: client_action_multi
+
+
+
+
+
+
+
+        ~record model=act_server #safe_quality_food_document_upload_action
+           @name: Upload Files
+           @type: ir.actions.server
+           @model_id ref='model_safe_quality_food_document'
+           @state: code
+           @code: action = self.fnxfs_menu_upload(cr, uid, context.get('active_ids'), context=context)
+
+        ~record model=values #safe_quality_food_document_upload_value
+           @name: Upload Files
+           @action_id ref='safe_quality_food_document_upload_action'
+           @value eval="'ir.actions.server,' + str(ref('safe_quality_food_document_upload_action'))"
            @key: action
            @model_id ref='model_safe_quality_food_document'
            @model: safe_quality_food.document

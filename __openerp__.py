@@ -13,9 +13,6 @@
         'base',
         'fnx',
         'mail',
-        # 'fnx',
-        # 'fis_integration',
-        # 'product',
         ],
     'js': [
         ],
