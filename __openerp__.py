@@ -12,6 +12,7 @@
     'depends': [
         'base',
         'fnx',
+        'fnx_fs',
         'mail',
         ],
     'js': [
