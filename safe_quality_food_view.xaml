@@ -223,12 +223,6 @@
            @model: safe_quality_food.document
            @key2: client_action_multi
 
-
-
-
-
-
-
         ~record model=act_server #safe_quality_food_document_upload_action
            @name: Upload Files
            @type: ir.actions.server

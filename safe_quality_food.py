@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # imports
+from fnx_fs.fields import files
 from openerp.osv import fields, osv
 from openerp.exceptions import ERPError
 from fnx.oe import Normalize
@@ -85,6 +86,7 @@ class safe_quality_food_document(Normalize, osv.Model):
         'version': fields.integer('Version No.', required=True),
         'sqf_edition': fields.char('SQF Edition', size=12),
         'body': fields.text('Document Body'),
+        'fnxfs_files': files('', string='Extra Documents'),
         }
 
     _defaults = {
