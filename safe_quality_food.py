@@ -75,7 +75,7 @@ class safe_quality_food_document(Normalize, osv.Model):
         'signing_id': fields.many2one(
             'res.users',
             string='Signer',
-            domain=([('groups_id','=',fields.ref('group_safe_quality_food_user'))]),
+            domain=([('groups_id','=',fields.ref('safe_quality_food.group_safe_quality_food_user'))]),
             ),
         'signed_date': fields.date('Signing Date'),
         'create_uid': fields.many2one('res.users', 'Entered By', readonly=True),
