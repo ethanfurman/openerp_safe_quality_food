@@ -13,7 +13,7 @@
 ~openerp
     ~data noupdate='0'
 
-        ~menuitem @SQF #safe_quality_food_main
+        ~menuitem @SQF #safe_quality_food_main groups='safe_quality_food.group_safe_quality_food_user'
         ~menuitem @Safe_Quality_Food #safe_quality_food_sub sequence='10' parent='safe_quality_food_main'
 
         ~record model=view #safe_quality_food_document_list
