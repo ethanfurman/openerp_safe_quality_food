@@ -53,13 +53,14 @@ class safe_quality_food_document(Normalize, osv.Model):
         }
 
     def _auto_init(self, cr, context=None):
-        super(safe_quality_food_document, self)._auto_init(cr, context)
+        res = super(safe_quality_food_document, self)._auto_init(cr, context)
         # Use unique index to implement unique constraint on the lowercase name (not possible using a constraint)
         cr.execute("SELECT indexname FROM pg_indexes WHERE indexname = 'safe_quality_food_document_reference_name_version_unique_index'")
         if not cr.fetchone():
             cr.execute("""CREATE UNIQUE INDEX "safe_quality_food_document_reference_name_version_unique_index" ON safe_quality_food_document
                             (lower(reference), lower(name), version)""")
             cr.commit()
+        return res
 
     def _needaction_domain_get(self, cr, uid, context=None):
         return [('signing_id','=',uid),('state','=','submitted')]
